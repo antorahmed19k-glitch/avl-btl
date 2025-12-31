@@ -1,0 +1,7 @@
+{
+  "name": "Project Ledger Pro",
+  "description": "A comprehensive project management and financial tracking application designed for professional audit-ready reporting, using BDT currency and British English localisation.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

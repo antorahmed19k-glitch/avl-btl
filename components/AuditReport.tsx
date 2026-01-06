@@ -95,7 +95,6 @@ const AuditReport: React.FC<AuditReportProps> = ({ project, currentUser, onBack,
     const dateStamp = new Date().toISOString().split('T')[0];
     document.title = `AuditReport_${safeProjectName}_${dateStamp}`;
     
-    // Brief delay to allow React to hide the dialog before printing
     setTimeout(() => {
       window.print();
       document.title = originalTitle;
@@ -243,6 +242,46 @@ const AuditReport: React.FC<AuditReportProps> = ({ project, currentUser, onBack,
             )}
           </div>
         </section>
+
+        {/* Documentation Annex Section */}
+        {(project.billTopSheetImage || project.budgetCopyAttachment) && (
+          <section className="space-y-6 print:break-before-page">
+            <div className="border-b-2 border-slate-100 pb-3 print:border-slate-900">
+              <h3 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em] mb-1">Annex A</h3>
+              <h2 className="text-xl font-bold text-slate-900 uppercase">Supporting Documentation</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {project.billTopSheetImage && (
+                <div className="space-y-4">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Document: Verified Bill Top Sheet</p>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-slate-50 p-2 print:border-slate-900 print:rounded-none">
+                    {project.billTopSheetImage.type.startsWith('image/') ? (
+                      <img src={project.billTopSheetImage.data} alt="Bill Top Sheet" className="w-full h-auto" />
+                    ) : (
+                      <div className="p-8 text-center text-slate-400 text-xs italic">
+                        Document format ({project.billTopSheetImage.type}) available in digital archive.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {project.budgetCopyAttachment && (
+                <div className="space-y-4">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Document: Original Budget Copy</p>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-slate-50 p-2 print:border-slate-900 print:rounded-none">
+                    {project.budgetCopyAttachment.type.startsWith('image/') ? (
+                      <img src={project.budgetCopyAttachment.data} alt="Budget Copy" className="w-full h-auto" />
+                    ) : (
+                      <div className="p-8 text-center text-slate-400 text-xs italic">
+                        Document format ({project.budgetCopyAttachment.type}) available in digital archive.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Signature Block - Only for print */}
         <div className="hidden print:block pt-32">

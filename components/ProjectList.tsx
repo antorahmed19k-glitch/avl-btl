@@ -5,7 +5,6 @@ import React, { useState, useMemo } from 'react';
 import { Project, User, UserRole } from '../types';
 import AuditReport from './AuditReport';
 
-// @google/genai: Fixed ProjectListProps to make onEdit optional
 interface ProjectListProps {
   projects: Project[];
   type: 'upcoming' | 'completed';
@@ -15,7 +14,7 @@ interface ProjectListProps {
 
 const ProjectList: React.FC<ProjectListProps> = ({ projects, type, onEdit, currentUser }) => {
   const [selectedAuditProject, setSelectedAuditProject] = useState<Project | null>(null);
-  const [previewImage, setPreviewImage] = useState<{data: string, name: string} | null>(null);
+  const [previewFile, setPreviewFile] = useState<{data: string, name: string, type: string} | null>(null);
   const isAdmin = currentUser.role === UserRole.ADMIN;
 
   const sortedAndFilteredProjects = useMemo(() => {
@@ -81,7 +80,6 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, type, onEdit, curre
       ...rows.map(r => r.join(','))
     ].join('\n');
 
-    // Include UTF-8 BOM for Excel compatibility
     const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -185,11 +183,21 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, type, onEdit, curre
                 <div className="flex items-center gap-2 border-l border-slate-100 pl-6">
                   {project.billTopSheetImage && (
                     <button 
-                      onClick={() => setPreviewImage({data: project.billTopSheetImage!.data, name: 'Bill Top Sheet'})}
+                      onClick={() => setPreviewFile({data: project.billTopSheetImage!.data, name: 'Bill Top Sheet', type: project.billTopSheetImage!.type})}
                       className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                       title="View Bill Top Sheet"
                     >
                       <i className="fas fa-file-invoice-dollar"></i>
+                    </button>
+                  )}
+
+                  {project.budgetCopyAttachment && (
+                    <button 
+                      onClick={() => setPreviewFile({data: project.budgetCopyAttachment!.data, name: 'Budget Copy', type: project.budgetCopyAttachment!.type})}
+                      className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
+                      title="View Budget Copy"
+                    >
+                      <i className="fas fa-paperclip"></i>
                     </button>
                   )}
                   
@@ -217,21 +225,51 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, type, onEdit, curre
         </div>
       )}
 
-      {/* Image Preview Modal */}
-      {previewImage && (
+      {/* File Preview Modal */}
+      {previewFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-4 border-b flex justify-between items-center">
-              <h3 className="font-bold text-slate-800">{previewImage.name}</h3>
-              <button onClick={() => setPreviewImage(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+            <div className="p-4 border-b flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <i className={`fas ${previewFile.type.startsWith('image/') ? 'fa-image' : 'fa-file-alt'} text-slate-400`}></i>
+                <h3 className="font-bold text-slate-800">{previewFile.name}</h3>
+              </div>
+              <button onClick={() => setPreviewFile(null)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
                 <i className="fas fa-times"></i>
               </button>
             </div>
-            <div className="flex-1 overflow-auto bg-slate-50 p-6 flex justify-center">
-              <img src={previewImage.data} alt={previewImage.name} className="max-w-full h-auto rounded shadow-lg" />
+            <div className="flex-1 overflow-auto bg-slate-100 p-6 flex items-center justify-center">
+              {previewFile.type.startsWith('image/') ? (
+                <img src={previewFile.data} alt={previewFile.name} className="max-w-full h-auto rounded-lg shadow-2xl" />
+              ) : (
+                <div className="bg-white p-12 rounded-2xl shadow-xl text-center max-w-sm">
+                  <i className="fas fa-file-download text-6xl text-slate-200 mb-6"></i>
+                  <h4 className="text-xl font-bold text-slate-800 mb-2">Non-Image Document</h4>
+                  <p className="text-slate-500 mb-8">This file type cannot be previewed directly in the browser.</p>
+                  <a 
+                    href={previewFile.data} 
+                    download={previewFile.name}
+                    className="inline-block w-full px-6 py-3 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-all"
+                  >
+                    Download Attachment
+                  </a>
+                </div>
+              )}
             </div>
-            <div className="p-4 bg-white border-t text-right">
-              <button onClick={() => setPreviewImage(null)} className="px-6 py-2 bg-slate-900 text-white rounded-lg font-semibold">Close Preview</button>
+            <div className="p-4 bg-white border-t flex justify-between items-center">
+              <div className="text-[10px] text-slate-400 uppercase font-black tracking-widest">
+                Akij Venture Ltd Secure Viewer
+              </div>
+              <div className="flex gap-3">
+                <a 
+                  href={previewFile.data} 
+                  download={previewFile.name}
+                  className="px-6 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold text-sm hover:bg-slate-200"
+                >
+                  Download
+                </a>
+                <button onClick={() => setPreviewFile(null)} className="px-6 py-2 bg-slate-900 text-white rounded-lg font-semibold text-sm">Close</button>
+              </div>
             </div>
           </div>
         </div>

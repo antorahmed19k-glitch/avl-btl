@@ -37,6 +37,7 @@ const AuditReport: React.FC<AuditReportProps> = ({ project, currentUser, onBack,
         Name: ${project.name}
         Current Status: ${projectStatus}
         Timeline: ${project.startDate} to ${project.endDate}
+        Settlement Status: ${project.isSettled ? 'FULLY SETTLED (Balance Zeroed)' : 'Pending Settlement'}
         
         FINANCIAL LEDGER:
         Total Budget: ৳${project.budgetAmount}
@@ -52,6 +53,7 @@ const AuditReport: React.FC<AuditReportProps> = ({ project, currentUser, onBack,
         1. Summarise financial performance and budget utilisation efficiency.
         2. Evaluate compliance with corporate submission deadlines.
         3. Highlight any risks associated with the current balance.
+        4. Specifically comment on the settlement status (Balance being zero if complete/settled).
         
         Use formal British English and professional auditing terminology.`;
 
@@ -170,9 +172,14 @@ const AuditReport: React.FC<AuditReportProps> = ({ project, currentUser, onBack,
             </div>
             <div className="space-y-1">
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Audit Category</p>
-              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide ${projectStatus === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'} print:border print:border-slate-200`}>
-                {projectStatus}
-              </span>
+              <div className="flex gap-2 items-center">
+                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide ${projectStatus === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'} print:border print:border-slate-200`}>
+                  {projectStatus}
+                </span>
+                {project.isSettled && (
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide bg-emerald-600 text-white">Settled</span>
+                )}
+              </div>
             </div>
             <div className="space-y-1">
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Commencement Date</p>
@@ -216,7 +223,10 @@ const AuditReport: React.FC<AuditReportProps> = ({ project, currentUser, onBack,
                   <td className="p-4 text-sm font-bold text-red-600 border-b border-slate-100 print:border-slate-900 text-right">{formatCurrency(project.expenseAmount)}</td>
                 </tr>
                 <tr className="bg-emerald-50/50 print:bg-white">
-                  <td className="p-4 text-sm font-black text-emerald-800 uppercase tracking-wide">Final Ledger Balance</td>
+                  <td className="p-4 text-sm font-black text-emerald-800 uppercase tracking-wide flex items-center gap-2">
+                    Final Ledger Balance
+                    {project.isSettled && <span className="text-[8px] font-black text-white bg-emerald-600 px-1.5 py-0.5 rounded-sm uppercase">Settled</span>}
+                  </td>
                   <td className="p-4 text-lg font-black text-emerald-600 text-right">{formatCurrency(project.balanceAmount)}</td>
                 </tr>
               </tbody>

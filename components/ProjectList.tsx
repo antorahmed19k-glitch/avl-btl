@@ -58,6 +58,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, type, onEdit, curre
       'Advance Amount (BDT)',
       'Expense Amount (BDT)',
       'Balance Amount (BDT)',
+      'Settled (Complete=0)',
       'Bill Submission Date',
       'SOP ROI Submission Date'
     ];
@@ -71,6 +72,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, type, onEdit, curre
       p.advanceAmount,
       p.expenseAmount,
       p.balanceAmount,
+      p.isSettled ? 'YES' : 'NO',
       p.billSubmissionDate || 'N/A',
       p.sopRoiEmailSubmissionDate || 'N/A'
     ]);
@@ -157,11 +159,18 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, type, onEdit, curre
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
                     <h4 className="text-lg font-bold text-slate-800">{project.name}</h4>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      type === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {type === 'completed' ? 'Completed' : 'Live'}
-                    </span>
+                    <div className="flex gap-2">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        type === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {type === 'completed' ? 'Completed' : 'Live'}
+                      </span>
+                      {project.isSettled && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white">
+                          Settled
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-4 text-sm text-slate-500">
                     <span className="flex items-center gap-1.5"><i className="far fa-calendar text-slate-400"></i> {formatDate(project.startDate)} — {formatDate(project.endDate)}</span>
@@ -176,7 +185,9 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, type, onEdit, curre
                    </div>
                    <div className="text-center px-3 py-1 bg-slate-50 rounded-lg">
                      <p className="text-[10px] font-bold text-slate-400 uppercase">Balance</p>
-                     <p className="text-sm font-bold text-emerald-600">{formatCurrency(project.balanceAmount)}</p>
+                     <p className={`text-sm font-bold ${project.isSettled ? 'text-slate-400' : 'text-emerald-600'}`}>
+                       {formatCurrency(project.balanceAmount)}
+                     </p>
                    </div>
                 </div>
 
